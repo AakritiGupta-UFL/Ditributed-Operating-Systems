@@ -1,0 +1,46 @@
+defmodule Mix.Tasks.SpawnCalculator do
+
+def start_link(a,b) do
+{:ok, pid} = Mix.Tasks.Vampirecalculator.start_link()
+
+
+#count=div(b-a+1,4);
+#IO.puts("count: #{count}")
+# Enum.chunk_every(a..b,count)
+#|> Enum.map(fn(each_n) -> spawn(__MODULE__, :work, [pid, Enum.at(each_n,0),Enum.at(each_n,1),b]) end)
+
+q=div(b-a+1,20)
+count=20
+ranges1= for i<- 0..q-1, do: a+(i*count)+i
+if(rem((b-a),20)!==0) do
+to_add=[(q*20)+q+a]
+ranges = ranges1++to_add
+#ranges |> IO.inspect()
+Enum.map(ranges, fn(range) -> spawn(__MODULE__, :work, [pid, range, count,b]) end)
+
+else
+#ranges1 |> IO.inspect()
+Enum.map(ranges1, fn(range) -> spawn(__MODULE__, :work, [pid, range, count,b]) end)
+end
+
+
+#count=div(b-a+1,4)
+#IO.puts("#{count}")
+#r2=a+count+1
+#r3=a+(2*count)+2
+#r4=a+(3*count)+3
+#IO.puts("r2: #{r2} and r3: #{r3} and r4: #{r4}")
+#ranges=[a,r2,r3,r4]
+#Enum.map(ranges, fn(range) -> spawn(__MODULE__, :work, [pid, range, count,b]) end)
+end
+
+
+def work(pid, range,count,b) do
+GenServer.call(pid, {:async_number, range, count,b})
+end
+
+#def work(pid, range,count,b) do
+#GenServer.call(pid, {:async_number, range, count,b})
+#end
+
+end
